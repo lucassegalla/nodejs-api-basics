@@ -1,9 +1,14 @@
 const http = require('http');
-const usuarios = [];
+const usuariosRoute = require('./routes/usuarios');
 
 //criar servidor com metodos req e res
 const server = http.createServer((req, res) => {
   console.log(req.method, req.url);
+
+  //encaminha requisições de usuarios
+  if (usuariosRoute(req, res)) {
+    return;
+  }
 
   //se url for vazia vai pra pagina inicial
   if (req.method === 'GET' && req.url === '/') {
@@ -11,40 +16,13 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  //receber requisições POST na url /usuarios em chunk e printar quando finalizado.. transformar json recebido em objeto javascript
-  if (req.method === 'POST' && req.url === '/usuarios') {
-    let body = '';
-
-    req.on('data', (chunk) => {
-      body += chunk;
-    });
-
-    req.on('end', () => {
-      const usuario = JSON.parse(body);
-
-      usuarios.push(usuario);
-      console.log(usuario);
-
-      res.statusCode = 201;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(usuarios));
-    });
-    return;
-  }
-
-  //metodo GET
-  if (req.method === 'GET' && req.url === '/usuarios') {
-    res.statusCode = 201;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(usuarios));
-    return;
-  }
-
+  //metodo GET /produtos
   if (req.url === '/produtos') {
     res.end('lista de produtos');
     return;
   }
 
+  //rota não encontrada
   res.statusCode = 404;
   res.end('pagina nao encontrada');
 });
